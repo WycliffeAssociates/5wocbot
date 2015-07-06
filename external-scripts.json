@@ -12,7 +12,5 @@
   "hubot-youtube",
   "hubot-dogeme",
   "hubot-heroku-keepalive",
-  "hubot-trello",
-  "hubot-victory",
-  "hubot-trello-organization"
+  "hubot-victory"
 ]
