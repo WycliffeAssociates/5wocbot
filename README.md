@@ -211,4 +211,4 @@ Add the subdomain hubot should connect to. If you web URL looks like
 ## Restart the bot
 
 You may want to get comfortable with `heroku logs` and `heroku restart` if
-you're having issues.
+you're having issues. They are very helpful.
