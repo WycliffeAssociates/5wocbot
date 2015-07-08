@@ -19,6 +19,12 @@ module.exports = function (robot) {
         var numDice = msg.match[1];
         var numSides = msg.match[2];
         var results = rollDice(numDice, numSides);
-        msg.send("You rolled a " + results.total + ". (" + results.rolls + ")");
+        msg.send("You rolled a " + results.total + ". [" + results.rolls + "]");
+    });
+    robot.respond(/d(\d+)/i,function(msg){
+        var numDice = 1;
+        var numSides = msg.match[1];
+        var results = rollDice(numDice, numSides);
+        msg.send("You rolled a " + results.total + ".");
     });
 };
