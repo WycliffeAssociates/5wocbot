@@ -12,7 +12,12 @@
 */
 module.exports = function (robot) {
     robot.respond(/(\d+)d(\d+)/i,function(msg){
-        //randomInt = Math.floor(Math.random() * msg.match[1]) + 1;
-        msg.send("I heard that!");
+        var numDice = msg.match[1];
+        var numSides = msg.match[2];
+        var total = 0;
+        for (var roll = 0; roll < numDice; roll++) {
+            total = total + Math.floor(Math.random() * numSides + 1);
+        }
+        msg.send("You rolled a " + total + ".");
     });
 };
