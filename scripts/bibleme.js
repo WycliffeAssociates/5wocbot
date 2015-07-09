@@ -18,9 +18,18 @@ module.exports = function(robot){
             processCatalog(catalog, current);
                 //msg.send(bookURL);
             book = robot.http(bookURL).get()(function(err, res, body) {
-                                verse = "test";
+                                verse = "";
 
-                    processUSFMDocument(body, verse, msg);
+                    //whole chapter
+                //processUSFMDocument(body, verse, msg, 1, 0, 0);
+                
+                //specific verse 3
+                //processUSFMDocument(body, verse, msg, 1, 3, 3);
+                //verse range 3-5
+                //processUSFMDocument(body, verse, msg, 1, 3, 5);
+                
+                //random
+                //processUSFMDocument(body, verse, msg, 0, 0, 0);
                     //output the string verse
 
             });
@@ -131,11 +140,17 @@ function processBook(src, verse) {
     xmlhttp.send();
 }
 
-function processUSFMDocument(doc, returnVerse, msg) {
+function processUSFMDocument(doc, returnVerse, msg, chapter, startVerse, endVerse) {
     var currentBook = "";
     var currentChapter = "";
     var verses = [];
     var lines = doc.split("\n");
+    
+    var startVerse = startVerse;
+    var endVerse = endVerse;
+    var sVerse = -1;
+    var count = -2;
+    
     for (i = 0; i < lines.length; i++) {
         line = lines[i];
         indexOfFirstSpace = line.indexOf(" ");
@@ -146,26 +161,68 @@ function processUSFMDocument(doc, returnVerse, msg) {
         if (dataType == "\\v") {
             indexOfSecondSpace = line.indexOf(" ", indexOfFirstSpace + 1);
             verseNumber = line.substring(indexOfFirstSpace + 1, indexOfSecondSpace);
-            verses.push({"book": currentBook, "chapter": currentChapter, "verse": verseNumber, "text": line.substring(indexOfSecondSpace + 1)});
+            if(chapter == 0){
+                //randomize
+                verses.push({"book": currentBook, "chapter": currentChapter, "verse": verseNumber, "text": line.substring(indexOfSecondSpace + 1)});
+            }
+            else if(currentChapter == chapter ){
+                //if specific verse range
+                if(startVerse != 0 && endVerse != 0){
+                    if((sVerse == -1)){
+                        //start verse
+                        sVerse = verseNumber;
+                        count = -1;
+                    }
+                    if((verseNumber - sVerse + 1) == startVerse){
+                        count = 0;
+                    }
+                    //distance
+                    if((count >= 0) && (count <= (endVerse-startVerse))){
+                        count++;
+                        verses.push({"book": currentBook, "chapter": currentChapter, "verse": verseNumber, "text": line.substring(indexOfSecondSpace + 1)});
+                    }
+                }
+                else{
+                    //get entire book
+                    verses.push({"book": currentBook, "chapter": currentChapter, "verse": verseNumber, "text": line.substring(indexOfSecondSpace + 1)});
+                }
+            }else{
+                //
+            }
         } else if (dataType == "\\c") {
             currentChapter = line.substring(indexOfFirstSpace + 1);
         } else if (dataType == "\\h") {
             currentBook = line.substring(indexOfFirstSpace + 1);
         }
     }
-    verseNum = Math.floor(Math.random() * verses.length);
-    verse = verses[verseNum];
-
-    returnVerse =  verse["text"] + " - " + verse["book"] + " " + verse["chapter"] + ":" + verse["verse"];
-    msg.send(returnVerse);
-    reference = getReference(verse["book"], bookSlug, verse["chapter"], verse["verse"]);
+    if(chapter == 0 && startVerse == 0 && endVerse == 0){
+        verseNum = Math.floor(Math.random() * verses.length);
+        //verseNum = 
+        verse = verses[verseNum];
+        returnVerse =  verse["text"];
+    }else{
+    //print range of verses
+    for(var x =0; x < verses.length; x++){
+        //verseNum = x;
+        verse = verses[x];
+        returnVerse += verse["text"];
+    }
+    }
+    if(startVerse == endVerse){
+        reference = getReference(verse["book"], bookSlug, verse["chapter"], verse["verse"]);
+    }else{
+        reference = getReference(verse["book"], bookSlug, verse["chapter"], startVerse + "-" + verse["verse"]);
+	}
+    
+	msg.send(returnVerse);
     msg.send(reference);
 }
 
 
 
 function getReference(book, sl, chapter, verse){
-    return "https://door43.org/en/ulb/v1/" + sl + "/" + getChapter(chapter) + ".usfm";
+	var ref = " - " + book + " " + chapter + ":" + verse;
+	return ref.link("https://door43.org/en/ulb/v1/" + sl + "/" + getChapter(chapter) + ".usfm");
 }
 
 function getChapter(chapter){
