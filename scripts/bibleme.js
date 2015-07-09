@@ -3,7 +3,8 @@ module.exports = function(robot){
     robot.hear(/bible me(.*)/i, function(msg) {
 
         //get the json file from the following URL
-        robot.http("https://api.unfoldingword.org/uw/txt/2/catalog.json").get()(function(err, res, body) {
+        robot.http("https://api.unfoldingword.org/uw/txt/2/catalog.json")
+        .get()(function(err, res, body) {
             //parse the json file accessed from the URL
             catalog = JSON.parse(body);
             numBooks = catalog.cat[0].langs[1].vers[1].toc.length;
@@ -14,7 +15,7 @@ module.exports = function(robot){
             //inputSelection = msg.match[1].split(" ");
             //if (inputSelection.length == 1){
             //    msg.send("pick random");
-                current = "";
+            current = "";
             processCatalog(catalog, current);
                 //msg.send(bookURL);
             book = robot.http(bookURL).get()(function(err, res, body) {
@@ -29,7 +30,7 @@ module.exports = function(robot){
                 //processUSFMDocument(body, verse, msg, 1, 3, 5);
                 
                 //random
-                //processUSFMDocument(body, verse, msg, 0, 0, 0);
+                processUSFMDocument(body, verse, msg, 0, 0, 0);
                     //output the string verse
 
             });
@@ -133,7 +134,7 @@ function processBook(src, verse) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            verse = processUSFMDocument(xmlhttp.responseText, verse);
+            verse = processUSFMDocument(xmlhttp.responseText, verse, 0, 0, 0);
         }
     }
     xmlhttp.open("GET", src, true);
@@ -217,12 +218,9 @@ function processUSFMDocument(doc, returnVerse, msg, chapter, startVerse, endVers
 	msg.send(returnVerse);
     msg.send(reference);
 }
-
-
-
 function getReference(book, sl, chapter, verse){
 	var ref = " - " + book + " " + chapter + ":" + verse;
-	return ref.link("https://door43.org/en/ulb/v1/" + sl + "/" + getChapter(chapter) + ".usfm");
+	return ref + " https://door43.org/en/ulb/v1/" + sl + "/" + getChapter(chapter) + ".usfm";
 }
 
 function getChapter(chapter){
