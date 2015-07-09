@@ -29,7 +29,7 @@ module.exports = function(robot){
                 //processUSFMDocument(body, verse, msg, 1, 3, 5);
                 
                 //random
-                //processUSFMDocument(body, verse, msg, 0, 0, 0);
+                processUSFMDocument(body, verse, msg, 0, 0, 0);
                     //output the string verse
 
             });
