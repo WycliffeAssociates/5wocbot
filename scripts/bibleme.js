@@ -1,10 +1,8 @@
-
 module.exports = function(robot){
     robot.hear(/bible me(.*)/i, function(msg) {
 
         //get the json file from the following URL
-        robot.http("https://api.unfoldingword.org/uw/txt/2/catalog.json")
-        .get()(function(err, res, body) {
+        robot.http("https://api.unfoldingword.org/uw/txt/2/catalog.json").get()(function(err, res, body) {
             //parse the json file accessed from the URL
             catalog = JSON.parse(body);
             numBooks = catalog.cat[0].langs[1].vers[1].toc.length;
@@ -12,61 +10,64 @@ module.exports = function(robot){
             bookURL = catalog.cat[0].langs[1].vers[1].toc[bookNum].src;
             bookSlug = catalog.cat[0].langs[1].vers[1].toc[bookNum].slug;
 
-            //inputSelection = msg.match[1].split(" ");
-            //if (inputSelection.length == 1){
-            //    msg.send("pick random");
-            current = "";
-            processCatalog(catalog, current);
-                //msg.send(bookURL);
-            book = robot.http(bookURL).get()(function(err, res, body) {
-                                verse = "";
+            inputSelection = msg.match[1].split(" ");
+            if (inputSelection.length == 1){
+                //msg.send("pick random");
+                current = "";
+                processCatalog(catalog, current);
+                    //msg.send(bookURL);
+                book = robot.http(bookURL).get()(function(err, res, body) {
+                                    verse = "test";
 
-                    //whole chapter
-                //processUSFMDocument(body, verse, msg, 1, 0, 0);
-                
-                //specific verse 3
-                //processUSFMDocument(body, verse, msg, 1, 3, 3);
-                //verse range 3-5
-                //processUSFMDocument(body, verse, msg, 1, 3, 5);
-                
-                //random
-                processUSFMDocument(body, verse, msg, 0, 0, 0);
-                    //output the string verse
+                        processUSFMDocument(body, verse, msg,0,0,0);
+                        //output the string verse
 
-            });
-            //}
-            /*msg.send("book is " + inputSelection[1]);
-            if(inputSelection[1] == "1" || inputSelection[1] == '2' || inputSelection[1] == '3'){
-                inputSelection[1] = inputSelection[1] + " " + inputSelection[2];
-                inputSelection[2] = inputSelection[3];
-                msg.send("book is now " + inputSelection[1]);
+                });
             }
-            var found = false;
-            var bookName = null;
-            var chapter = null;
-            var verse = null;
-            msg.send(inputSelection);
-            for(var i = 0; i < numBooks; i++){
-                msg.send("trying... " + catalog.cat[0].langs[1].vers[1].toc[i].title);
-                if(strCmp(inputSelection[1], catalog.cat[0].langs[1].vers[1].toc[i].title) == true){
-                    msg.send("found");
-                    found = true;
-                    bookName = inputSelection[1];
-                    break;
+            else{
+                //msg.send("book is " + inputSelection[1]);
+                if(inputSelection[1] == "1" || inputSelection[1] == '2' || inputSelection[1] == '3'){
+                    inputSelection[1] = inputSelection[1] + " " + inputSelection[2];
+                    inputSelection[2] = inputSelection[3];
+                    //msg.send("book is now " + inputSelection[1]);
                 }
+                var found = false;
+                var bookName = null;
+                var chapter = null;
+                var verse = null;
+                //msg.send(inputSelection);
+                for(var i = 0; i < numBooks; i++){
+                    //msg.send("trying... " + catalog.cat[0].langs[1].vers[1].toc[i].title);
+                    if(strCmp(inputSelection[1], catalog.cat[0].langs[1].vers[1].toc[i].title) == true){
+                        //msg.send("found");
+                        found = true;
+                        bookName = inputSelection[1];
+                        bookNum = i;
+                        break;
+                    }
+                }
+                if(!found){
+                    msg.send("Sorry, could not find the book: " + inputSelection[1]);
+                }
+
+                verseChapter = inputSelection[2].split(":");
+                chapter = verseChapter[0];
+                verse = verseChapter[1];
+                //msg.send("chapter is: " + chapter);
+                //msg.send("verse is: " + verse);
+                bookURL = catalog.cat[0].langs[1].vers[1].toc[bookNum].src;
+                bookSlug = catalog.cat[0].langs[1].vers[1].toc[bookNum].slug;
+
+                book = robot.http(bookURL).get()(function(err, res, body) {
+                                    current = "";
+
+                        processUSFMDocument(body, current, msg,chapter,verse,verse);
+                        //output the string verse
+
+                });
+            
+
             }
-            if(!found){
-                msg.send("Sorry, could not find the book: " + inputSelection[1]);
-            }
-
-            verseChapter = inputSelection[2].split(":");
-            chapter = verseChapter[0];
-            verse = verseChapter[1];
-            msg.send("chapter is: " + chapter);
-            msg.send("verse is: " + verse);
-            */
-
-
         });
     });
 
@@ -134,7 +135,7 @@ function processBook(src, verse) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            verse = processUSFMDocument(xmlhttp.responseText, verse, 0, 0, 0);
+            verse = processUSFMDocument(xmlhttp.responseText, verse);
         }
     }
     xmlhttp.open("GET", src, true);
@@ -213,14 +214,17 @@ function processUSFMDocument(doc, returnVerse, msg, chapter, startVerse, endVers
         reference = getReference(verse["book"], bookSlug, verse["chapter"], verse["verse"]);
     }else{
         reference = getReference(verse["book"], bookSlug, verse["chapter"], startVerse + "-" + verse["verse"]);
-	}
+    }
     
-	msg.send(returnVerse);
+    msg.send(returnVerse);
     msg.send(reference);
 }
+
+
+
 function getReference(book, sl, chapter, verse){
-	var ref = " - " + book + " " + chapter + ":" + verse;
-	return ref + " https://door43.org/en/ulb/v1/" + sl + "/" + getChapter(chapter) + ".usfm";
+    var ref = " - " + book + " " + chapter + ":" + verse;
+    return ref+"\nhttps://door43.org/en/ulb/v1/" + sl + "/" + getChapter(chapter) + ".usfm";
 }
 
 function getChapter(chapter){
