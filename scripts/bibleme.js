@@ -1,3 +1,19 @@
+// Description:
+//   Pulls Bible Verses from door43.org
+//
+// Dependencies:
+//   None
+//
+// Configuration:
+//   LIST_OF_ENV_VARS_TO_SET
+//
+// Commands:
+//   bible me - random Bible verse
+//   bible me book N:N - retrieve that Bible verse
+//
+// Author:
+//   WycliffeAssociates
+
 module.exports = function(robot){
     robot.hear(/bible me(.*)/i, function(msg) {
 
