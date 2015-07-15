@@ -13,5 +13,6 @@
   "hubot-dogeme",
   "hubot-heroku-keepalive",
   "hubot-victory",
-  "hubot-trello-organization"
+  "hubot-trello-organization",
+  "hubot-trello"
 ]
